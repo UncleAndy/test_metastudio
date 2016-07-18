@@ -30,5 +30,4 @@
 //= require plupload/i18n/ru
 //= require plupload.settings
 //= require jquery.plupload.queue
-//= require jquery-ui
 //= require tag-it

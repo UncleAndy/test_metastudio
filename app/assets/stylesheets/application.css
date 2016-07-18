@@ -24,3 +24,11 @@ a.no_underline:hover {
 a.no_underline:active {
     text-decoration: none;
 }
+
+.plupload-error {
+    background-color: red;
+    color: white;
+    padding: 8px;
+    text-align: center;
+    display: none;
+}

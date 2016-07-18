@@ -1,5 +1,6 @@
 %h2{:align => 'center'}
   = I18n.t('image_labels.new_title')
+#plupload-error.plupload-error
 #uploader
   %p
     Your browser doesn't have Flash, Silverlight or HTML5 support.
@@ -11,12 +12,18 @@
   Возобновить загрузку
 :javascript
   $(function(){
+    $("#plupload-error").hide();
     $("#uploader").pluploadQueue({
       runtimes: 'html5,flash,silverlight,html4',
       url: '#{plupload_user_images_path(current_user)}',
       chunk_size: '100kb',
       max_retries: 5,
       dragdrop: true,
+      views: {
+            list: true,
+            thumbs: true, // Show thumbs
+            active: 'thumbs'
+      },
       multipart_params: {
         '#{request_forgery_protection_token}': '#{form_authenticity_token}',
         '#{Rails.application.config.session_options[:key]}': '#{request.session_options[:id]}'
@@ -26,13 +33,20 @@
     });
     var uploader = $('#uploader').pluploadQueue();
     uploader.bind('UploadComplete', function() {
-        if( uploader.total.uploaded >= uploader.files.length)
-        {
-          window.location = '#{user_images_path(current_user)}';
-        }
+      if( uploader.total.uploaded >= uploader.files.length)
+      {
+        window.location = '#{user_images_path(current_user)}';
+      }
+      $("#uploader_start").hide();
+      $("#uploader_stop").hide();
     });
     uploader.bind('BeforeUpload', function() {
       $("#uploader_stop").show();
+      $("#uploader_start").hide();
+    });
+    uploader.bind('Error', function(up, error) {
+      $("#plupload-error").html(error.message);
+      $("#plupload-error").show();
     });
     $("#uploader_start").hide();
     $("#uploader_stop").hide();
@@ -40,9 +54,13 @@
     $("#uploader_stop").click(function() {
       uploader.stop();
       $("#uploader_start").show();
+      $("#uploader_stop").hide();
     });
 
     $("#uploader_start").click(function() {
+      uploader.refresh();
       uploader.start();
+      $("#uploader_start").hide();
+      $("#uploader_stop").show();
     });
   });
