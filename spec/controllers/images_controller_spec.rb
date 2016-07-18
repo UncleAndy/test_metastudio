@@ -133,6 +133,7 @@ RSpec.describe ImagesController, type: :controller do
       sign_in @user
 
       @file = fixture_file_upload('/test.jpg', 'image/jpeg')
+      @md5sum_file = 'a7b1c0c74d81da66d60395b57092e94c'
       @image = FactoryGirl.create(:image, :location => @file, :title => 'Test image')
     end
 
@@ -181,6 +182,13 @@ RSpec.describe ImagesController, type: :controller do
     end
 
     describe "#update" do
+      before(:each) do
+        @tag1 = FactoryGirl.create(:tag, :name => 'Tag 1')
+        @tag2 = FactoryGirl.create(:tag, :name => 'Tag 2')
+        @tag3 = FactoryGirl.create(:tag, :name => 'Tag 3')
+        @tag4 = FactoryGirl.create(:tag, :name => 'Abc 3')
+      end
+
       it "должен менять данные записи" do
         put :update, { :user_id => @user.id, :id => @image.id, :image => {:title => 'New image name'}}
         @image.reload
@@ -190,6 +198,55 @@ RSpec.describe ImagesController, type: :controller do
       it "должен делать перенаправление на список ссылок" do
         put :update, { :user_id => @user.id, :id => @image.id, :image => {:title => 'New image name'}}
         expect(response).to redirect_to(user_images_path(@user.id))
+      end
+
+      it 'должен правильно сохранять список тэгов при создании' do
+        put :update, { :user_id => @user.id, :id => @image.id, :image => {:title => 'New image name', :tags => 'Tag 1,Tag 2,Tag 3'}}
+        @image.reload
+        expect(@image.tags.count).to eq(3)
+        expect(@image.tags).to include(@tag1)
+        expect(@image.tags).to include(@tag2)
+        expect(@image.tags).to include(@tag3)
+        expect(@image.tags).to_not include(@tag4)
+      end
+
+      it 'должен правильно сохранять список тэгов при удалении' do
+        @image.tags << @tag1
+        @image.tags << @tag2
+        @image.tags << @tag3
+        @image.tags << @tag4
+        put :update, { :user_id => @user.id, :id => @image.id, :image => {:title => 'New image name', :tags => 'Tag 2,Tag 3'}}
+        @image.reload
+        expect(@image.tags.count).to eq(2)
+        expect(@image.tags).to_not include(@tag1)
+        expect(@image.tags).to include(@tag2)
+        expect(@image.tags).to include(@tag3)
+        expect(@image.tags).to_not include(@tag4)
+      end
+
+      it 'должен правильно сохранять список тэгов при добавлении' do
+        @image.tags << @tag2
+        @image.tags << @tag3
+        put :update, { :user_id => @user.id, :id => @image.id, :image => {:title => 'New image name', :tags => 'Tag 1,Tag 2,Tag 3,Abc 3'}}
+        @image.reload
+        expect(@image.tags.count).to eq(4)
+        expect(@image.tags).to include(@tag1)
+        expect(@image.tags).to include(@tag2)
+        expect(@image.tags).to include(@tag3)
+        expect(@image.tags).to include(@tag4)
+      end
+
+      it 'должен создавать новые тэги если их еще нет' do
+        @image.tags << @tag2
+        @image.tags << @tag3
+        put :update, { :user_id => @user.id, :id => @image.id, :image => {:title => 'New image name', :tags => 'Tag 5,Tag 6,Tag 7'}}
+        @image.reload
+        expect(@image.tags.count).to eq(3)
+        expect(@image.tags).to_not include(@tag1)
+        expect(@image.tags).to_not include(@tag2)
+        expect(@image.tags).to_not include(@tag3)
+        expect(@image.tags).to_not include(@tag4)
+        expect(Tag.count).to eq(7)
       end
     end
 
@@ -203,6 +260,69 @@ RSpec.describe ImagesController, type: :controller do
       it "должен делать перенаправление на список ссылок" do
         delete :destroy, { :user_id => @user.id, :id => @image.id }
         expect(response).to redirect_to(user_images_path(@user.id))
+      end
+    end
+
+    describe '#plupload' do
+      context 'без использования chunks' do
+        it 'должен создавать новую картинку' do
+          expect {
+            post :plupload, { :user_id => @user.id, :file => @file, :name => 'Plupload file name.jpg' }
+          }.to change(Image, :count).by(1)
+        end
+      end
+
+      context 'с использованием chunks' do
+        before(:each) do
+          @chunk0 = fixture_file_upload('/test_chunk0', 'application/octet-stream')
+          @chunk1 = fixture_file_upload('/test_chunk1', 'application/octet-stream')
+          @chunk2 = fixture_file_upload('/test_chunk2', 'application/octet-stream')
+
+          @assembled_file = Tempfile.new('chunked_file')
+          allow(Tempfile).to receive(:new).and_return(Tempfile.new('any'))
+          allow(Tempfile).to receive(:new).with('chunk').and_return(@assembled_file)
+        end
+
+        it 'должен создавать новую картинку' do
+          expect {
+            post :plupload, { chunk: 0, chunks: 3, :user_id => @user.id, :file => @chunk0, :name => 'Plupload file name.jpg' }
+            post :plupload, { chunk: 1, chunks: 3, :user_id => @user.id, :file => @chunk1, :name => 'Plupload file name.jpg' }
+            post :plupload, { chunk: 2, chunks: 3, :user_id => @user.id, :file => @chunk2, :name => 'Plupload file name.jpg' }
+          }.to change(Image, :count).by(1)
+        end
+
+        context 'при прямом порядке chunks' do
+          it 'должен создавать правильный файл' do
+            post :plupload, { chunk: 0, chunks: 3, :user_id => @user.id, :file => @chunk0, :name => 'Plupload file name.jpg' }
+            post :plupload, { chunk: 1, chunks: 3, :user_id => @user.id, :file => @chunk1, :name => 'Plupload file name.jpg' }
+            post :plupload, { chunk: 2, chunks: 3, :user_id => @user.id, :file => @chunk2, :name => 'Plupload file name.jpg' }
+            @assembled_file.rewind
+            assembled_md5sum = Digest::MD5.hexdigest(@assembled_file.read)
+            expect(assembled_md5sum).to eq(@md5sum_file)
+          end
+        end
+
+        context 'при обратном порядке chunks' do
+          it 'должен создавать правильный файл' do
+            post :plupload, { chunk: 2, chunks: 3, :user_id => @user.id, :file => @chunk2, :name => 'Plupload file name.jpg' }
+            post :plupload, { chunk: 1, chunks: 3, :user_id => @user.id, :file => @chunk1, :name => 'Plupload file name.jpg' }
+            post :plupload, { chunk: 0, chunks: 3, :user_id => @user.id, :file => @chunk0, :name => 'Plupload file name.jpg' }
+            @assembled_file.rewind
+            assembled_md5sum = Digest::MD5.hexdigest(@assembled_file.read)
+            expect(assembled_md5sum).to eq(@md5sum_file)
+          end
+        end
+
+        context 'при случайном порядке chunks' do
+          it 'должен создавать правильный файл' do
+            post :plupload, { chunk: 1, chunks: 3, :user_id => @user.id, :file => @chunk1, :name => 'Plupload file name.jpg' }
+            post :plupload, { chunk: 2, chunks: 3, :user_id => @user.id, :file => @chunk2, :name => 'Plupload file name.jpg' }
+            post :plupload, { chunk: 0, chunks: 3, :user_id => @user.id, :file => @chunk0, :name => 'Plupload file name.jpg' }
+            @assembled_file.rewind
+            assembled_md5sum = Digest::MD5.hexdigest(@assembled_file.read)
+            expect(assembled_md5sum).to eq(@md5sum_file)
+          end
+        end
       end
     end
   end

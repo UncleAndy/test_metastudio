@@ -149,6 +149,9 @@ class ImagesController < ApplicationController
         render :nothing => true
         false
       end
+    else
+      params[:location] = params[:file]
+      params[:title] = params[:name]
     end
   else
     true
