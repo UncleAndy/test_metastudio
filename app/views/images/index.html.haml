@@ -1,0 +1,45 @@
+%h2
+  - if @self_collection
+    = I18n.t('your_collection')
+  - else
+    = I18n.t('collection')
+= render partial: 'shared/collection_tabs', locals: { tab: 'images' }
+- if @self_collection
+  = link_to new_user_image_path(@user_id) do
+    %button.btn.btn-primary.btn-actions
+      = I18n.t('new')
+#blueimp-gallery.blueimp-gallery
+  .slides
+  %h3.title
+  %a.prev ‹
+  %a.next ›
+  %a.close ×
+  %a.play-pause
+  %ol.indicator
+  .modal.fade
+    .modal-dialog
+      .modal-content
+        .modal-header
+          %button.close{"aria-hidden" => "true", :type => "button"} ×
+          %h4.modal-title
+        .modal-body.next
+        .modal-footer
+          %button.btn.btn-default.pull-left.prev{:type => "button"}
+            %i.glyphicon.glyphicon-chevron-left{'data-unicode' => 'e079'}
+            Previous
+          %button.btn.btn-primary.next{:type => "button"}
+            Next
+            %i.glyphicon.glyphicon-chevron-right{'data-unicode' => 'e080'}
+#links
+  - if @images.present?
+    - @images.each do |img|
+      %div.image-list-container
+        %a.image-list-link{"data-gallery" => "", :href => img.location.url, :title => img.title}
+          %img.image-list-img{:alt => img.title, :src => img.location.thumb.url}/
+        - if @self_collection
+          %div.image-list-actions-container
+            %div.image-list-actions
+              = link_to edit_user_image_path(@user_id, img.id), :class => 'no_underline' do
+                %span.glyphicon.glyphicon-edit
+              = link_to user_image_path(@user_id, img.id), :class => 'no_underline', :method => :delete, :data => {:confirm => I18n.t("delete_sure")} do
+                %span.glyphicon.glyphicon-remove

@@ -1,0 +1,14 @@
+%h2{:align => 'center'}
+  = I18n.t('links_labels.new_title')
+.form-container
+  = form_for [@user, @link], :html => { :role => 'form', :class => 'forms' } do |f|
+    .form-group
+      %label{ for: "url" }
+        = I18n.t('links_labels.url')
+      = f.text_field :url, class: 'form-control'
+    .form-group
+      %label{ for: "name" }
+        = I18n.t('links_labels.name')
+      = f.text_field :name, class: 'form-control'
+    %button.btn.btn-success{ type: 'submit' }
+      = I18n.t('links_labels.save')

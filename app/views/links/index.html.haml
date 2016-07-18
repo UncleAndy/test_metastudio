@@ -1,0 +1,32 @@
+%h2
+  - if @self_collection
+    = I18n.t('your_collection')
+  - else
+    = I18n.t('collection')
+= render partial: 'shared/collection_tabs', locals: { tab: 'links' }
+- if @self_collection
+  = link_to new_user_link_path(@user_id) do
+    %button.btn.btn-primary.btn-actions
+      = I18n.t('new')
+%table.table.table-bordered.table-condensed.table-striped
+  %tr
+    %th
+      Ссылка
+    %th
+      Когда добавлена
+    - if @self_collection
+      %th
+        Действия
+  - if @links.present?
+    - @links.each do |link|
+      %tr
+        %td
+          = link_to link.name, link.url, target: '_blank'
+        %td
+          = link.created_at
+        - if @self_collection
+          %td
+            = link_to edit_user_link_path(@user_id, link.id) do
+              %span.glyphicon.glyphicon-edit
+            = link_to user_link_path(@user_id, link.id), :method => :delete, :data => {:confirm => I18n.t("delete_sure")} do
+              %span.glyphicon.glyphicon-remove

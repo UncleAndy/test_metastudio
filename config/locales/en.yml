@@ -1,0 +1,59 @@
+# Files in the config/locales directory are used for internationalization
+# and are automatically loaded by Rails. If you want to use locales other
+# than English, add the necessary files in this directory.
+#
+# To use the locales, use `I18n.t`:
+#
+#     I18n.t 'hello'
+#
+# In views, this is aliased to just `t`:
+#
+#     <%= t('hello') %>
+#
+# To use a different locale, set it with `I18n.locale`:
+#
+#     I18n.locale = :es
+#
+# This would use the information in config/locales/es.yml.
+#
+# To learn more, please read the Rails Internationalization guide
+# available at http://guides.rubyonrails.org/i18n.html.
+
+en:
+  your_collection: "Your collection"
+  collection: "Collection"
+  images: "Images"
+  links: "Links"
+  new: "Add new..."
+  delete_sure: "Are you sure for delete it?"
+  image_labels:
+    location: "Image file"
+    title: "Image title"
+    save: "Save"
+    new_title: "New image"
+    edit_title: "Change title"
+    tags: 'Tags:'
+  links_labels:
+    url: "URL"
+    name: "Description"
+    save: "Save"
+    new_title: "New link"
+    edit_title: "Edit link"
+  errors:
+    absent_collection: 'Collection not exists'
+    no_user_permission: 'You have not permission for this action'
+    images:
+      create: 'Can not create image.'
+      update: 'Can not update image.'
+      absent: 'Image absent.'
+    links:
+      create: 'Can not create link.'
+      update: 'Can not update link.'
+    tags:
+      create: 'Can not create tag.'
+  menu:
+    logout: "Logout"
+    login: "Login"
+    signup: "Sign Up"
+    collection: "Your collection"
+    home: "Home"
