@@ -45,6 +45,7 @@
           mime_types: [
               {title : "Image files", extensions : "jpg,gif,png"},
               {title : "Video files", extensions : "avi,mpg,mpeg,mov,mkv,wmv,mp4"},
+              {title : "Audio files", extensions : "wav,mp3"},
               {title : "Zip files", extensions : "zip"}
           ]
       },
@@ -118,7 +119,8 @@
           },
 
           Error: function(up, err) {
-              document.getElementById('console').innerHTML += "\nError #" + err.code + ": " + err.message;
+              $('#console').html("\nОшибка #" + err.code + ": " + err.message);
+              $('#console').show();
           },
 
           UploadComplete: function() {
