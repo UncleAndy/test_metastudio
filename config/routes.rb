@@ -4,14 +4,13 @@ Rails.application.routes.draw do
   root 'home#index'
 
   resources :users, only:[] do
-    resources :links
-    resources :images do
-      member do
-        post :new_tag
-        get :remove_tag
-      end
+    resources :userfiles do
       collection do
         post :plupload
+      end
+      member do
+        get :preview
+        get :download
       end
     end
   end

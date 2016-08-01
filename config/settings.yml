@@ -2,3 +2,29 @@ redis:
   host: 127.0.0.1
   port: 6379
   db: 2
+
+files:
+  # Параметры загрузки и обработки файлов
+  upload:
+    # Длина случайной части, добавляемой к имени файла для хранения
+    random_length: 8
+    # Размер превью для картинок
+    image_preview_size: [100, 75]
+    image_square_preview_size: 232
+    # Размер увеличенного варианта для картинок
+    image_zoom_size: [200, 150]
+    # Размер превью для видео
+    image_zoom_with_pad_size: [416, 312]
+    pad_color: '#fff'
+    video_preview_size: [100, 75]
+    video_square_preview_size: 232
+    video_zoom_size: [256, 152]
+    # Минимальный размер заливаемой пользователем картинки
+    min_image_dimensions: [450, 450]
+    only_first_frame: true # suitable for gifs
+    file_path: 'files/'
+  # Параметры показа файлов
+  video_preview_path: '/images/video-icon-preview.png'
+  file_preview_path: '/images/file-icon-preview.png'
+  version_dir:
+    large: 'files'

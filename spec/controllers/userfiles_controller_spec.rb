@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-RSpec.describe ImagesController, type: :controller do
+RSpec.describe UserfilesController, type: :controller do
   render_views
 
   include Devise::TestHelpers
@@ -37,7 +37,7 @@ RSpec.describe ImagesController, type: :controller do
 
     describe "#create" do
       it "должно быть перенаправление на страницу логина" do
-        post :create, { :user_id => @user.id, :image => {} }
+        post :create, { :user_id => @user.id, :userfile => {} }
         expect(response).to redirect_to(new_user_session_path)
       end
     end
@@ -51,7 +51,7 @@ RSpec.describe ImagesController, type: :controller do
 
     describe "#update" do
       it "должно быть перенаправление на страницу логина" do
-        put :update, { :user_id => @user.id, :id => 1, :image => {} }
+        put :update, { :user_id => @user.id, :id => 1, :userfile => {} }
         expect(response).to redirect_to(new_user_session_path)
       end
     end
@@ -96,7 +96,7 @@ RSpec.describe ImagesController, type: :controller do
 
     describe "#create" do
       it "должен перенаправлять на главную с сообщением о нехватке прав" do
-        post :create, { :user_id => @user.id, :image => {} }
+        post :create, { :user_id => @user.id, :userfile => {} }
         expect(response).to redirect_to(root_path)
         expect(flash[:notice]).to eq(I18n.t('errors.no_user_permission'))
       end
@@ -112,7 +112,7 @@ RSpec.describe ImagesController, type: :controller do
 
     describe "#update" do
       it "должен перенаправлять на главную с сообщением о нехватке прав" do
-        put :update, { :user_id => @user.id, :id => 1, :image => {} }
+        put :update, { :user_id => @user.id, :id => 1, :userfile => {} }
         expect(response).to redirect_to(root_path)
         expect(flash[:notice]).to eq(I18n.t('errors.no_user_permission'))
       end
@@ -134,7 +134,7 @@ RSpec.describe ImagesController, type: :controller do
 
       @file = fixture_file_upload('/test.jpg', 'image/jpeg')
       @md5sum_file = 'a7b1c0c74d81da66d60395b57092e94c'
-      @image = FactoryGirl.create(:image, :location => @file, :title => 'Test image')
+      @image = FactoryGirl.create(:userfile, :location => @file, :title => 'Test image')
     end
 
     describe "#index" do
@@ -164,13 +164,13 @@ RSpec.describe ImagesController, type: :controller do
     describe "#create" do
       it "должен создавать новую запись" do
         expect {
-          post :create, { :user_id => @user.id, :image => { :title => 'Image test', :location => @file} }
-        }.to change(Image, :count).by(1)
+          post :create, { :user_id => @user.id, :userfile => { :title => 'Image test', :location => @file} }
+        }.to change(Userfile, :count).by(1)
       end
 
       it "должен делать перенаправление на список ссылок" do
-        post :create, { :user_id => @user.id, :image => { :title => 'Image test', :location => @file} }
-        expect(response).to redirect_to(user_images_path(@user.id))
+        post :create, { :user_id => @user.id, :userfile => { :title => 'Image test', :location => @file} }
+        expect(response).to redirect_to(user_userfiles_path(@user.id))
       end
     end
 
@@ -190,18 +190,18 @@ RSpec.describe ImagesController, type: :controller do
       end
 
       it "должен менять данные записи" do
-        put :update, { :user_id => @user.id, :id => @image.id, :image => {:title => 'New image name'}}
+        put :update, { :user_id => @user.id, :id => @image.id, :userfile => {:title => 'New image name'}}
         @image.reload
         expect(@image.title).to eq('New image name')
       end
 
       it "должен делать перенаправление на список ссылок" do
-        put :update, { :user_id => @user.id, :id => @image.id, :image => {:title => 'New image name'}}
-        expect(response).to redirect_to(user_images_path(@user.id))
+        put :update, { :user_id => @user.id, :id => @image.id, :userfile => {:title => 'New image name'}}
+        expect(response).to redirect_to(user_userfiles_path(@user.id))
       end
 
       it 'должен правильно сохранять список тэгов при создании' do
-        put :update, { :user_id => @user.id, :id => @image.id, :image => {:title => 'New image name', :tags => 'Tag 1,Tag 2,Tag 3'}}
+        put :update, { :user_id => @user.id, :id => @image.id, :userfile => {:title => 'New image name', :tags => 'Tag 1,Tag 2,Tag 3'}}
         @image.reload
         expect(@image.tags.count).to eq(3)
         expect(@image.tags).to include(@tag1)
@@ -215,7 +215,7 @@ RSpec.describe ImagesController, type: :controller do
         @image.tags << @tag2
         @image.tags << @tag3
         @image.tags << @tag4
-        put :update, { :user_id => @user.id, :id => @image.id, :image => {:title => 'New image name', :tags => 'Tag 2,Tag 3'}}
+        put :update, { :user_id => @user.id, :id => @image.id, :userfile => {:title => 'New image name', :tags => 'Tag 2,Tag 3'}}
         @image.reload
         expect(@image.tags.count).to eq(2)
         expect(@image.tags).to_not include(@tag1)
@@ -227,7 +227,7 @@ RSpec.describe ImagesController, type: :controller do
       it 'должен правильно сохранять список тэгов при добавлении' do
         @image.tags << @tag2
         @image.tags << @tag3
-        put :update, { :user_id => @user.id, :id => @image.id, :image => {:title => 'New image name', :tags => 'Tag 1,Tag 2,Tag 3,Abc 3'}}
+        put :update, { :user_id => @user.id, :id => @image.id, :userfile => {:title => 'New image name', :tags => 'Tag 1,Tag 2,Tag 3,Abc 3'}}
         @image.reload
         expect(@image.tags.count).to eq(4)
         expect(@image.tags).to include(@tag1)
@@ -239,7 +239,7 @@ RSpec.describe ImagesController, type: :controller do
       it 'должен создавать новые тэги если их еще нет' do
         @image.tags << @tag2
         @image.tags << @tag3
-        put :update, { :user_id => @user.id, :id => @image.id, :image => {:title => 'New image name', :tags => 'Tag 5,Tag 6,Tag 7'}}
+        put :update, { :user_id => @user.id, :id => @image.id, :userfile => {:title => 'New image name', :tags => 'Tag 5,Tag 6,Tag 7'}}
         @image.reload
         expect(@image.tags.count).to eq(3)
         expect(@image.tags).to_not include(@tag1)
@@ -254,12 +254,12 @@ RSpec.describe ImagesController, type: :controller do
       it "должен удалять запись" do
         expect {
           delete :destroy, { :user_id => @user.id, :id => @image.id }
-        }.to change(Image, :count).by(-1)
+        }.to change(Userfile, :count).by(-1)
       end
 
       it "должен делать перенаправление на список ссылок" do
         delete :destroy, { :user_id => @user.id, :id => @image.id }
-        expect(response).to redirect_to(user_images_path(@user.id))
+        expect(response).to redirect_to(user_userfiles_path(@user.id))
       end
     end
 
@@ -268,7 +268,7 @@ RSpec.describe ImagesController, type: :controller do
         it 'должен создавать новую картинку' do
           expect {
             post :plupload, { :user_id => @user.id, :file => @file, :name => 'Plupload file name.jpg' }
-          }.to change(Image, :count).by(1)
+          }.to change(Userfile, :count).by(1)
         end
       end
 
@@ -288,7 +288,7 @@ RSpec.describe ImagesController, type: :controller do
             post :plupload, { chunk: 0, chunks: 3, :user_id => @user.id, :file => @chunk0, :name => 'Plupload file name.jpg' }
             post :plupload, { chunk: 1, chunks: 3, :user_id => @user.id, :file => @chunk1, :name => 'Plupload file name.jpg' }
             post :plupload, { chunk: 2, chunks: 3, :user_id => @user.id, :file => @chunk2, :name => 'Plupload file name.jpg' }
-          }.to change(Image, :count).by(1)
+          }.to change(Userfile, :count).by(1)
         end
 
         context 'при прямом порядке chunks' do
@@ -322,6 +322,62 @@ RSpec.describe ImagesController, type: :controller do
             assembled_md5sum = Digest::MD5.hexdigest(@assembled_file.read)
             expect(assembled_md5sum).to eq(@md5sum_file)
           end
+        end
+      end
+    end
+
+    context '#download' do
+      before(:each) do
+        @chunk0 = fixture_file_upload('/test_chunk0', 'application/octet-stream')
+        @chunk1 = fixture_file_upload('/test_chunk1', 'application/octet-stream')
+        @chunk2 = fixture_file_upload('/test_chunk2', 'application/octet-stream')
+
+        @assembled_file = Tempfile.new('chunked_file')
+        allow(Tempfile).to receive(:new).and_return(Tempfile.new('any'))
+        allow(Tempfile).to receive(:new).with('chunk').and_return(@assembled_file)
+        post :plupload, { chunk: 0, chunks: 3, :user_id => @user.id, :file => @chunk0, :name => 'Plupload file name.jpg' }
+        post :plupload, { chunk: 1, chunks: 3, :user_id => @user.id, :file => @chunk1, :name => 'Plupload file name.jpg' }
+        post :plupload, { chunk: 2, chunks: 3, :user_id => @user.id, :file => @chunk2, :name => 'Plupload file name.jpg' }
+      end
+
+      it 'должен возвращать правильный файл' do
+        get :download, :user_id => @user, :id => Userfile.last.id
+        expect(response.body).to_not be_empty
+        expect(response.body).to eq IO.binread(@assembled_file.path)
+      end
+    end
+
+    context '#preview' do
+      context 'для картинки' do
+        before(:each) do
+          @new_file = FactoryGirl.create(:userfile, :location => @file, :file_type => 'image')
+        end
+
+        it 'должен перенаправлять на правильный файл' do
+          get :preview, :user_id => @user, :id => @new_file.id
+          expect(response.body).to redirect_to(@new_file.location_url(:preview))
+        end
+      end
+
+      context 'для видео' do
+        before(:each) do
+          @new_file = FactoryGirl.create(:userfile, :location => @file, :file_type => 'video')
+        end
+
+        it 'должен перенаправлять на правильную иконку' do
+          get :preview, :user_id => @user, :id => @new_file.id
+          expect(response.body).to redirect_to(Settings.files.video_preview_path)
+        end
+      end
+
+      context 'для обычных файлов' do
+        before(:each) do
+          @new_file = FactoryGirl.create(:userfile, :location => @file, :file_type => 'none')
+        end
+
+        it 'должен перенаправлять на правильную иконку' do
+          get :preview, :user_id => @user, :id => @new_file.id
+          expect(response.body).to redirect_to(Settings.files.file_preview_path)
         end
       end
     end

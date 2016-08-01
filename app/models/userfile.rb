@@ -1,11 +1,10 @@
-class Image < ActiveRecord::Base
-  # :title, :location, :user_id
-
-  mount_uploader :location, ImageUploader
+class Userfile < ActiveRecord::Base
+  # :title, :location, :user_id, :mimetype, :preview_type
+  mount_uploader :location, UserfileUploader
 
   belongs_to :user
-  has_many :image_tags
-  has_many :tags, through: :image_tags
+  has_many :userfile_tags
+  has_many :tags, through: :userfile_tags
 
   default_scope { order('created_at DESC') }
 
@@ -13,11 +12,10 @@ class Image < ActiveRecord::Base
     @randomstring ||= SecureRandom.hex(10)
   end
 
-
   def set_tags(tags_list)
     # Сначала удаляем отсутствующие
-    self.image_tags.each do |image_tag|
-      image_tag.destroy if !tags_list.include?(image_tag.tag.name)
+    self.userfile_tags.each do |tag|
+      tag.destroy if !tags_list.include?(tag.tag.name)
     end
 
     # Добавляем отсутствующие в базе

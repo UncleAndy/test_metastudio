@@ -57,3 +57,9 @@ ru:
     signup: "Регистрация"
     collection: "Ваша коллекция"
     home: "На главную"
+  file_labels:
+    new_title: 'Новые файлы'
+    title: "Описание"
+    save: "Сохранить"
+    edit_title: "Изменение описания"
+    tags: "Тэги"

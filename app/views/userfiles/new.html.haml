@@ -1,0 +1,136 @@
+%h2{:align => 'center'}
+  = I18n.t('file_labels.new_title')
+#console.plupload-error
+#filelist
+  %table.table.table-bordered.table-hover
+    %tbody{id: 'filelist_body'}
+      %tr
+        %th= "Имя файла"
+        %th= "Размер"
+        %th= "Описание"
+        %th= "Тэги"
+        %th= "Прогресс"
+%p
+  &nbsp;
+#container
+  %button.btn.btn-sm.btn-primary{:id => 'browse_files'}
+    Выбрать файлы
+  %button.btn.btn-sm.btn-danger{:id => 'uploader_stop'}
+    Остановить загрузку
+  %button.btn.btn-sm.btn-primary{:id => 'uploader_start'}
+    Загрузить
+:javascript
+  $(function(){
+    $("#plupload-error").hide();
+
+    var uploader = new plupload.Uploader({
+      runtimes : 'html5,flash,silverlight,html4',
+      flash_swf_url : 'http://rawgithub.com/moxiecode/moxie/master/bin/flash/Moxie.cdn.swf',
+      silverlight_xap_url : 'http://rawgithub.com/moxiecode/moxie/master/bin/silverlight/Moxie.cdn.xap',
+
+      browse_button : 'browse_files',
+      container: document.getElementById('container'),
+
+      url: '#{plupload_user_userfiles_path(current_user)}',
+      multipart_params: {
+        '#{request_forgery_protection_token}': '#{form_authenticity_token}',
+        '#{Rails.application.config.session_options[:key]}': '#{request.session_options[:id]}'
+      },
+
+
+      chunk_size: '100kb',
+      max_retries: 5,
+
+      filters : {
+          mime_types: [
+              {title : "Image files", extensions : "jpg,gif,png"},
+              {title : "Video files", extensions : "avi,mpg,mpeg,mov,mkv,wmv,mp4"},
+              {title : "Zip files", extensions : "zip"}
+          ]
+      },
+
+      init: {
+          PostInit: function() {
+              $("#uploader_start").hide();
+              $("#uploader_stop").hide();
+
+              $('#uploader_start').click(function() {
+                var success = true;
+
+                for (i = 0; i < uploader.files.length; i++) {
+                  file = uploader.files[i];
+                  title = $("#title"+file.id).val();
+                  if (title.trim() == '') {
+                    success = false;
+                  };
+                };
+
+                if (!success) {
+                  $('#console').show();
+                  $('#console').html('Заполните описание файлов!');
+                } else {
+                  uploader.start();
+                  $("#uploader_start").hide();
+                  $("#uploader_stop").show();
+                  return false;
+                };
+              });
+
+              $("#uploader_stop").click(function() {
+                uploader.stop();
+                $("#uploader_start").show();
+                $("#uploader_stop").hide();
+              });
+          },
+
+          FilesAdded: function(up, files) {
+              $("#uploader_start").show();
+              plupload.each(files, function(file) {
+                document.getElementById('filelist_body').innerHTML +=
+                  '<tr><td>'+file.name+ '</td><td>' + plupload.formatSize(file.size) + '</td><td><input class="form-control" width="100%" type="text" id="title'+file.id+'"/></td><td><input type="text" id="tags'+file.id+'" class="tags_inputs"></td><td id="fileprogress'+file.id+'"></td></tr>';
+              });
+
+              $(".tags_inputs").tagit({
+                allowSpaces: true,
+                autocomplete: {
+                  delay: 0,
+                  minLength: 2,
+                  source: '/tags',
+                }
+              });
+              up.disableBrowse();
+              $("#browse_files").prop("disabled",true);
+          },
+
+          UploadFile: function(up, file) {
+            up.settings.multipart_params['title'] = $("#title"+file.id).val();
+            up.settings.multipart_params['tags'] = $("#tags"+file.id).val();
+          },
+
+          BeforeUpload: function(up, file) {
+            $('#console').hide();
+            $("#uploader_stop").show();
+            $("#uploader_start").hide();
+          },
+
+          UploadProgress: function(up, file) {
+              document.getElementById('fileprogress'+file.id).innerHTML = file.percent + "%";
+          },
+
+          Error: function(up, err) {
+              document.getElementById('console').innerHTML += "\nError #" + err.code + ": " + err.message;
+          },
+
+          UploadComplete: function() {
+            if( uploader.total.uploaded >= uploader.files.length)
+            {
+              window.location = '#{user_userfiles_path(current_user)}';
+            }
+            $("#uploader_start").hide();
+            $("#uploader_stop").hide();
+          }
+      }
+    });
+
+    uploader.init();
+  });

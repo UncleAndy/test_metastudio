@@ -57,3 +57,10 @@ en:
     signup: "Sign Up"
     collection: "Your collection"
     home: "Home"
+  file_labels:
+    new_title: 'New files'
+    title: "Description"
+    save: "Save"
+    edit_title: "Change description"
+    tags: "Tags"
+

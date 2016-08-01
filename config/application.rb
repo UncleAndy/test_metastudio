@@ -16,5 +16,7 @@ module TestMetastudio
     config.encoding = "utf-8"
 
     config.active_record.raise_in_transactional_callbacks = true
+
+    #config.middleware.use Rack::ContentLength
   end
 end

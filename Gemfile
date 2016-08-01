@@ -14,7 +14,6 @@ gem 'ruby-filemagic'
 gem 'jquery-rails'
 gem 'jquery-ui-rails'
 gem 'tag-it-rails'
-gem 'turbolinks'
 gem 'jbuilder', '~> 2.0'
 gem 'sdoc', '~> 0.4.0', group: :doc
 
@@ -41,6 +40,11 @@ gem 'autoprefixer-rails'
 gem 'Bootstrap-Image-Gallery-rails'
 
 gem 'plupload-rails'
+
+gem 'cocaine'
+gem 'streamio-ffmpeg'
+gem 'stringex'
+gem 'mime-types'
 
 group :test, :development do
   gem 'rspec-rails'

@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160718093803) do
+ActiveRecord::Schema.define(version: 20160731192652) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -49,6 +49,32 @@ ActiveRecord::Schema.define(version: 20160718093803) do
   end
 
   add_index "tags", ["name"], name: "index_tags_on_name", unique: true, using: :btree
+
+  create_table "userfile_tags", force: :cascade do |t|
+    t.integer  "userfile_id"
+    t.integer  "tag_id"
+    t.datetime "created_at",  null: false
+    t.datetime "updated_at",  null: false
+  end
+
+  add_index "userfile_tags", ["tag_id"], name: "index_userfile_tags_on_tag_id", using: :btree
+  add_index "userfile_tags", ["userfile_id", "tag_id"], name: "index_userfile_tags_on_userfile_id_and_tag_id", unique: true, using: :btree
+
+  create_table "userfiles", force: :cascade do |t|
+    t.integer  "user_id"
+    t.string   "title"
+    t.string   "location"
+    t.string   "mimetype"
+    t.datetime "created_at",                    null: false
+    t.datetime "updated_at",                    null: false
+    t.string   "preview_type", default: "none"
+    t.string   "filename"
+    t.string   "file_type"
+    t.string   "content_type"
+    t.integer  "file_size"
+  end
+
+  add_index "userfiles", ["user_id"], name: "index_userfiles_on_user_id", using: :btree
 
   create_table "users", force: :cascade do |t|
     t.string   "email",                  default: "", null: false

@@ -1,5 +1,5 @@
 FactoryGirl.define do
-  factory :image do
+  factory :userfile do
     
   end
 end
